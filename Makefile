@@ -24,19 +24,11 @@ $(SUMMARIES_OUTPUT_DIR)/%.summary.md: $(INPUT_DIR)/%.md | $(SUMMARIES_OUTPUT_DIR
 				 -t 8192 \
 				 -s "Output a summary of this document, retain people, events, nations, any organizations and religous groups, and conclusions" -f "$<" | tee "$@"
 
-# Rule to create a symlink with {date}-{topic}.txt format using a mapping or fallback
-$(SUMMARIES_OUTPUT_DIR)/%.txt: $(SUMMARIES_OUTPUT_DIR)/%.summary.md
-	@echo "Creating symlink for $<..."
-	@if [ -f $(MAP_FILE) ] && grep -q "$<" $(MAP_FILE); then \
-		MAPPED_NAME=$$(sed -n "s|^$<:\s*\(.*\)$$|\1|p" $(MAP_FILE)); \
-		ln -sf $(notdir $<) $(SUMMARIES_OUTPUT_DIR)/$${MAPPED_NAME}.txt; \
-	else \
-		ln -sf $(notdir $<) $(SUMMARIES_OUTPUT_DIR)/$*.txt; \
-	fi
 
 .PHONY: map-semantic-filenames
 map-semantic-filenames:
 	while read -r source target; do ln -s "../jfk_text/$$source" "jfk_text_semantic_names/$$target"; done < metadata/.semantic-filenames
+	while read -r source target; do ln -s "../jfk_text_summaries/$$source" "jfk_text_summaries_semantic_names/$$target"; done < metadata/.semantic-filenames-summaries
 
 $(SUMMARIES_OUTPUT_DIR)/.hist-semantic-filenames: scripts/create-semantic-filename.sh prompts/file-naming-prompt.txt
 	ls jfk_text_summaries |xargs -L1 ./scripts/create-semantic-filename.sh |tee -a $@

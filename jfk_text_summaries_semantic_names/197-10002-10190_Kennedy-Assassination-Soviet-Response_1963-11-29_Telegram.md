@@ -1,0 +1,1 @@
+../jfk_text_summaries/197-10002-10190.summary.md
