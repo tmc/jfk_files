@@ -8,6 +8,7 @@ CGPT_MODEL := gemini-2.0-flash
 SUMMARIES := $(patsubst $(INPUT_DIR)/%.md,$(SUMMARIES_OUTPUT_DIR)/%.summary.md,$(MD_FILES))
 CHECKSUM_FILE := .checksums
 CGPT := go tool cgpt
+MAP_FILE := filename_map.txt
 
 # Function to calculate SHA1 checksum
 sha1sum = sha1sum $< | cut -d' ' -f1
@@ -19,7 +20,26 @@ $(SUMMARIES_OUTPUT_DIR):
 # Rule to create a summary file
 $(SUMMARIES_OUTPUT_DIR)/%.summary.md: $(INPUT_DIR)/%.md | $(SUMMARIES_OUTPUT_DIR)
 	@echo "Summarizing $<..."
-	CGPT_BACKEND=$(CGPT_BACKEND) CGPT_MODEL=$(CGPT_MODEL) $(CGPT) -s "Output a summary of this document, retain people, events, nations, any organizations and religous groups, and conclusions" -f "$<" | tee "$@"
+	CGPT_BACKEND=$(CGPT_BACKEND) CGPT_MODEL=$(CGPT_MODEL) $(CGPT) \
+				 -t 8192 \
+				 -s "Output a summary of this document, retain people, events, nations, any organizations and religous groups, and conclusions" -f "$<" | tee "$@"
+
+# Rule to create a symlink with {date}-{topic}.txt format using a mapping or fallback
+$(SUMMARIES_OUTPUT_DIR)/%.txt: $(SUMMARIES_OUTPUT_DIR)/%.summary.md
+	@echo "Creating symlink for $<..."
+	@if [ -f $(MAP_FILE) ] && grep -q "$<" $(MAP_FILE); then \
+		MAPPED_NAME=$$(sed -n "s|^$<:\s*\(.*\)$$|\1|p" $(MAP_FILE)); \
+		ln -sf $(notdir $<) $(SUMMARIES_OUTPUT_DIR)/$${MAPPED_NAME}.txt; \
+	else \
+		ln -sf $(notdir $<) $(SUMMARIES_OUTPUT_DIR)/$*.txt; \
+	fi
+
+.PHONY: map-semantic-filenames
+map-semantic-filenames:
+	while read -r source target; do ln -s "../jfk_text/$$source" "jfk_text_semantic_names/$$target"; done < metadata/.semantic-filenames
+
+$(SUMMARIES_OUTPUT_DIR)/.hist-semantic-filenames: scripts/create-semantic-filename.sh prompts/file-naming-prompt.txt
+	ls jfk_text_summaries |xargs -L1 ./scripts/create-semantic-filename.sh |tee -a $@
 
 # Dependency rule that checks checksums
 $(INPUT_DIR)/%.md:
@@ -30,7 +50,9 @@ $(INPUT_DIR)/%.md:
 		exit 1; \
 	fi
 
-all: $(SUMMARIES)
+SYMLINKS := $(patsubst $(INPUT_DIR)/%.md,$(SUMMARIES_OUTPUT_DIR)/%.txt,$(MD_FILES))
+# Target to build both summaries and symlinks
+all: $(SUMMARIES) $(SYMLINKS)
 
 # Create or update the checksum file
 update_checksums: $(MD_FILES)
@@ -49,3 +71,15 @@ clean:
 
 # Delete target files on error
 .DELETE_ON_ERROR:
+
+
+#$(MAP_FILE): .cgpt-hist-$(MAP_FILE)
+#	cat $< | go tool yq .messages[-1].text 
+#	#go tool txtar -x
+
+#.cgpt-hist-$(MAP_FILE): $(SUMMARIES) prompts/mapping-file-prompt.txt
+#	go tool ctx-exec go tool txtar Makefile $(SUMMARIES_OUTPUT_DIR)/*md | \
+#		CGPT_BACKEND=$(CGPT_BACKEND) CGPT_MODEL=$(CGPT_MODEL) $(CGPT) \
+#		-t 8192 \
+#		-s "$(shell cat prompts/mapping-file-prompt.txt)" -O $@
+
