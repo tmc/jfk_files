@@ -45,7 +45,7 @@ The final output should be a single txtar file. The txtar file should contain:
         *   Foreign Connections
         *   Graph Analysis (of document relationships)
         *   Graph Meta-Analysis (analysis of the graph analysis)
-3.  **Depth of Analysis:**  Create a directory structure that goes at least three levels deep.  For example:
+3.  **Depth of Analysis:**  Create analysis least three levels deep.  For example:
     *   `CIA Involvement/Overview/README.md`
     *   `CIA Involvement/OperationMongoose/README.md`
     *   `CIA Involvement/Allegations/README.md`
@@ -55,46 +55,6 @@ The final output should be a single txtar file. The txtar file should contain:
     *   **Level 3:**  Detailed diagrams that incorporate multiple relationships and potential interpretations.
 5.  **Transcription Errors:** Be mindful of potential transcription errors in the documents.  Note any apparent errors or inconsistencies in your analysis.  Cross-reference information to identify potential errors.
 6.  **Exhaustive Output:**  The txtar file should be a complete and self-contained representation of your analysis, including all generated files and diagrams.
-
-**Example Directory Structure (Illustrative):**
-
-```
-├── README.md (Top-level summary, should include sophistacted mermaid graphs and link to all over analysis)
-├── General_Relevance/
-│   ├── README.md
-│   ├── documents.txt (List of relevant documents)
-│   ├── Important_Documents/
-│   │   ├── README.md
-│   │   ├── documents.txt
-│   │   ├── document1.md
-│   │   └── document2.md
-│   └── Less_Important_Documents/
-│       ├── README.md
-│       ├── documents.txt
-│       ├── document3.md
-│       └── document4.md
-├── CIA_Involvement/
-│   ├── README.md
-│   ├── documents.txt
-│   ├── Overview/
-│   │   ├── README.md
-│   │   ├── documents.txt
-│   │   ├── document5.md
-│   │   └── mermaid_diagram_level1.mmd
-│   ├── Operation_Mongoose/
-│   │   ├── README.md
-│   │   ├── documents.txt
-│   │   ├── document6.md
-│   │   └── mermaid_diagram_level2.mmd
-│   └── Allegations/
-│       ├── README.md
-│       ├── documents.txt
-│       ├── document7.md
-│       └── mermaid_diagram_level3.mmd
-├── Moscow_Connections/
-│   ├── ...
-└── ...
-```
 
 **Input:**
 
